@@ -26,28 +26,36 @@ import javax.xml.transform.stream.StreamResult;
 public class MainDimenSax {
     //源dimens文件的dimen集合
     private static ArrayList<DimenBean> list;
-    //当前根目录：D:/android/
-    private static String baseDirPath;
     //基准dp，比喻：360dp
     private static float baseDP = 360.0f;
     //默认支持的dp值
     private static final String[] defaultDPArr = new String[]{"384", "392", "400", "410", "411", "480", "533", "592", "600", "640", "662", "720", "768", "800", "811", "820", "960", "961", "1024", "1280", "1365"};
     //去重复的数据集合
     private static HashSet<String> dataSet = new HashSet<>();
-    //基准dimens.xml文件路径，比喻：D:/android/res/values/dimens.xml
-    private static String baseDimenFilePath;
 
     /**
-     * 入口
+     * 命令行入口
      *
-     * @param args 命令行参数
+     * @param args 命令行参数[注意，命令行是以空格分割的]
      */
     public static void main(String[] args) {
+        //获取当前目录的绝对路径
+        String resFolderPath = new File("./res/").getAbsolutePath();
+        start(args, resFolderPath);
+    }
+
+    /**
+     * 可调用的入口
+     *
+     * @param params        待适配集合，第一个position是基准值
+     * @param resFolderPath 当前module的res目录路径
+     */
+    public static void start(String[] params, String resFolderPath) {
         //数组第一项为基准宽度dp，后面为需要生成的对应宽度dp
-        if (args != null && args.length > 0) {
-            baseDP = Float.parseFloat(args[0]);
-            for (int i = 1; i < args.length; i++) {
-                dataSet.add(args[i]);
+        if (params != null && params.length > 0) {
+            baseDP = Float.parseFloat(params[0]);
+            for (int i = 1; i < params.length; i++) {
+                dataSet.add(params[i]);
             }
         } else {
             System.out.println("没有发现输入参数...");
@@ -58,10 +66,8 @@ public class MainDimenSax {
         }
         System.out.println("基准dp：" + baseDP + " dp");
         System.out.println("待适配的屏幕dp参数: " + dataSet.toString());
-        //获取当前目录的结对路径
-        baseDirPath = new File("./res/").getAbsolutePath();
         //获取基准的dimens.xml文件
-        baseDimenFilePath = baseDirPath + File.separator + "values/dimens.xml";
+        String baseDimenFilePath = resFolderPath + File.separator + "values/dimens.xml";
         File testBaseDimenFile = new File(baseDimenFilePath);
         //判断基准文件是否存在
         if (!testBaseDimenFile.exists()) {
@@ -83,9 +89,9 @@ public class MainDimenSax {
             //获取当前dp除以baseDP后的倍数
             float multiple = Float.parseFloat(item) / baseDP;
             //创建当前dp对应的dimens文件目录
-            String outPutDir = baseDirPath + "/values-w" + item + "dp/";
+            String outPutDir = resFolderPath + "/values-w" + item + "dp/";
             new File(outPutDir).mkdirs();
-            //待生成的dimens文件里路径
+            //生成的dimens文件里路径
             String outPutFile = outPutDir + "dimens.xml";
             //生成目标文件dimens.xml输出目录
             createDestinationDimens(list, multiple, outPutFile);
@@ -187,11 +193,21 @@ public class MainDimenSax {
      * @return
      */
     private static String countValue(String oldValue, float multiple) {
+        if (oldValue == null) {
+            return "";
+        }
+        if ("".equals(oldValue.trim()) || oldValue.length() <= 2 || oldValue.startsWith("@dimen/")) {
+            return oldValue.trim();
+        }
+        //乘以系数
+        double temp = 0;
+        try {
+            temp = Double.parseDouble(oldValue.substring(0, oldValue.length() - 2).trim()) * multiple;
+        } catch (Exception e) {
+            return oldValue.trim();
+        }
         //数据格式化对象
         DecimalFormat df = new DecimalFormat("0.00");
-        String suffix = oldValue.substring(oldValue.length() - 2, oldValue.length());
-        //乘以系数
-        double temp = Double.parseDouble(oldValue.substring(0, oldValue.length() - 2)) * multiple;
-        return df.format(temp) + suffix;
+        return df.format(temp) + "dp";
     }
 }

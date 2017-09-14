@@ -8,7 +8,10 @@
      If you have some variable special layout,please add below.
      It's better for us to use a unified variable.
     -->
-	<!-- screen match for layout view size -->
+
+    <dimen name="common_margin">@dimen/dp_10</dimen>
+
+    <!-- screen match for layout view size -->
     <dimen name="dp_m_60">-60dp</dimen>
     <dimen name="dp_m_30">-30dp</dimen>
     <dimen name="dp_m_20">-20dp</dimen>
@@ -423,5 +426,5 @@
     <dimen name="sp_40">40sp</dimen>
     <dimen name="sp_42">42sp</dimen>
     <dimen name="sp_48">48sp</dimen>
-	
+
 </resources>

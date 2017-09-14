@@ -15,9 +15,9 @@ public class SAXReadHandler extends DefaultHandler {
     private ArrayList<DimenBean> list = null;
     private DimenBean dimenBean;
     private String tempElement;
-    public static final String ELEMENT_RESOURCE = "resources";
-    public static final String ELEMENT_DIMEN = "dimen";
-    public static final String PROPERTY_NAME = "name";
+    static final String ELEMENT_RESOURCE = "resources";
+    static final String ELEMENT_DIMEN = "dimen";
+    static final String PROPERTY_NAME = "name";
 
     public ArrayList<DimenBean> getData() {
         return list;
@@ -34,8 +34,7 @@ public class SAXReadHandler extends DefaultHandler {
                 //创建对象
                 dimenBean = new DimenBean();
                 if (attributes != null && attributes.getLength() > 0) {
-                    String property = attributes.getValue(PROPERTY_NAME);
-                    dimenBean.name = property;
+                    dimenBean.name = attributes.getValue(PROPERTY_NAME);
                 }
             }
         }

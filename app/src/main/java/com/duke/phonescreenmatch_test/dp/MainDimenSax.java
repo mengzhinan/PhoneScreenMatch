@@ -77,10 +77,10 @@ public class MainDimenSax {
         //解析源dimens.xml文件
         list = readBaseDimenFile(baseDimenFilePath);
         if (list == null || list.size() <= 0) {
-            System.out.println("DK WARNING:  \"../res/values/dimens.xml\" 文件无数据!");
+            System.out.println("DK WARNING:  \"./res/values/dimens.xml\" 文件无数据!");
             return;
         } else {
-            System.out.println("OK \"../res/values/dimens.xml\" 基准dimens文件解析成功!");
+            System.out.println("OK \"./res/values/dimens.xml\" 基准dimens文件解析成功!");
         }
         //循环指定的dp参数，生成对应的dimens-swXXXdp.xml文件
         Iterator<String> iterator = dataSet.iterator();

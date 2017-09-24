@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -24,14 +25,13 @@ import javax.xml.transform.stream.StreamResult;
  * @Description: dp适配文件生成工具类
  */
 public class MainDimenSax {
-    //源dimens文件的dimen集合
-    private static ArrayList<DimenBean> list;
     //基准dp，比喻：360dp
-    private static float baseDP = 360.0f;
+    public static final double DEFAULT_DP = 360.00;
+    private static double baseDP = DEFAULT_DP;
     //默认支持的dp值
     private static final String[] defaultDPArr = new String[]{"384", "392", "400", "410", "411", "480", "533", "592", "600", "640", "662", "720", "768", "800", "811", "820", "960", "961", "1024", "1280", "1365"};
     //去重复的数据集合
-    private static HashSet<String> dataSet = new HashSet<>();
+    private static HashSet<Double> dataSet = new HashSet<>();
 
     /**
      * 命令行入口
@@ -41,29 +41,65 @@ public class MainDimenSax {
     public static void main(String[] args) {
         //获取当前目录的绝对路径
         String resFolderPath = new File("./res/").getAbsolutePath();
-        start(args, resFolderPath);
+        String tempBaseDP = null;
+        String[] needMatchs = null;
+        String[] ignoreMatchs = null;
+        if (args != null && args.length > 0) {
+            /**
+             * 调用Main函数，默认数组第一个为基准适配dp值
+             */
+            tempBaseDP = args[0];
+            ignoreMatchs = new String[]{tempBaseDP};
+            if (args.length > 1) {
+                needMatchs = Arrays.copyOfRange(args, 1, args.length);
+            }
+        }
+        start(tempBaseDP, needMatchs, ignoreMatchs, resFolderPath);
     }
 
+
     /**
-     * 可调用的入口
+     * 适配文件调用入口
      *
-     * @param params        待适配集合，第一个position是基准值
-     * @param resFolderPath 当前module的res目录路径
+     * @param tempBaseDP    基准dp值
+     * @param needMatchs    待适配宽度dp值
+     * @param ignoreMatchs  待忽略宽度dp值
+     * @param resFolderPath base dimens.xml 文件的res目录
      */
-    public static void start(String[] params, String resFolderPath) {
-        //数组第一项为基准宽度dp，后面为需要生成的对应宽度dp
-        if (params != null && params.length > 0) {
-            baseDP = Float.parseFloat(params[0]);
-            for (int i = 1; i < params.length; i++) {
-                dataSet.add(params[i]);
-            }
-        } else {
-            System.out.println("没有发现输入参数...");
+    public static void start(String tempBaseDP, String[] needMatchs, String[] ignoreMatchs, String resFolderPath) {
+        try {
+            baseDP = Double.parseDouble(tempBaseDP);
+        } catch (NumberFormatException e) {
+            baseDP = DEFAULT_DP;
+            e.printStackTrace();
         }
         //添加默认的数据
         for (int i = 0; i < defaultDPArr.length; i++) {
-            dataSet.add(defaultDPArr[i]);
+            try {
+                dataSet.add(Double.parseDouble(defaultDPArr[i]));
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
         }
+        if (needMatchs != null) {
+            for (int i = 0; i < needMatchs.length; i++) {
+                try {
+                    dataSet.add(Double.parseDouble(needMatchs[i]));
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        if (ignoreMatchs != null) {
+            for (int i = 0; i < ignoreMatchs.length; i++) {
+                try {
+                    dataSet.remove(Double.parseDouble(ignoreMatchs[i]));
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
         System.out.println("基准dp：" + baseDP + " dp");
         System.out.println("待适配的屏幕dp参数: " + dataSet.toString());
         //获取基准的dimens.xml文件
@@ -75,7 +111,7 @@ public class MainDimenSax {
             return;
         }
         //解析源dimens.xml文件
-        list = readBaseDimenFile(baseDimenFilePath);
+        ArrayList<DimenBean> list = readBaseDimenFile(baseDimenFilePath);
         if (list == null || list.size() <= 0) {
             System.out.println("DK WARNING:  \"./res/values/dimens.xml\" 文件无数据!");
             return;
@@ -83,13 +119,13 @@ public class MainDimenSax {
             System.out.println("OK \"./res/values/dimens.xml\" 基准dimens文件解析成功!");
         }
         //循环指定的dp参数，生成对应的dimens-swXXXdp.xml文件
-        Iterator<String> iterator = dataSet.iterator();
+        Iterator<Double> iterator = dataSet.iterator();
         while (iterator.hasNext()) {
-            String item = iterator.next();
+            double item = iterator.next();
             //获取当前dp除以baseDP后的倍数
-            float multiple = Float.parseFloat(item) / baseDP;
+            double multiple = item / baseDP;
             //创建当前dp对应的dimens文件目录
-            String outPutDir = resFolderPath + "/values-w" + item + "dp/";
+            String outPutDir = resFolderPath + "/values-w" + (int) item + "dp/";
             new File(outPutDir).mkdirs();
             //生成的dimens文件里路径
             String outPutFile = outPutDir + "dimens.xml";
@@ -126,7 +162,7 @@ public class MainDimenSax {
      * @param multiple   对应新文件需要乘以的系数
      * @param outPutFile 目标文件输出目录
      */
-    private static void createDestinationDimens(ArrayList<DimenBean> list, float multiple, String outPutFile) {
+    private static void createDestinationDimens(ArrayList<DimenBean> list, double multiple, String outPutFile) {
         try {
             File targetFile = new File(outPutFile);
             if (targetFile.exists()) {
@@ -192,12 +228,16 @@ public class MainDimenSax {
      * @param multiple 乘以系数后，且带单位的字符串
      * @return
      */
-    private static String countValue(String oldValue, float multiple) {
+    private static String countValue(String oldValue, double multiple) {
         if (oldValue == null) {
             return "";
         }
-        if ("".equals(oldValue.trim()) || oldValue.length() <= 2 || oldValue.startsWith("@dimen/")) {
-            return oldValue.trim();
+        oldValue = oldValue.trim();
+        if ("".equals(oldValue)
+                || oldValue.length() <= 2
+                || oldValue.startsWith("@dimen/")
+                || !"dp".equals(oldValue.substring(oldValue.length() - 2, oldValue.length()))) {
+            return oldValue;
         }
         //乘以系数
         double temp = 0;

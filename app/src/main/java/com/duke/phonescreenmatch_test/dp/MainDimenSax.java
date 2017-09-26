@@ -54,25 +54,35 @@ public class MainDimenSax {
                 needMatchs = Arrays.copyOfRange(args, 1, args.length);
             }
         }
-        start(tempBaseDP, needMatchs, ignoreMatchs, resFolderPath);
+        start(true, tempBaseDP, needMatchs, ignoreMatchs, resFolderPath);
     }
 
 
     /**
      * 适配文件调用入口
      *
+     * @param isFontMatch   字体是否也适配(是否与dp尺寸一样等比缩放)
      * @param tempBaseDP    基准dp值
      * @param needMatchs    待适配宽度dp值
      * @param ignoreMatchs  待忽略宽度dp值
      * @param resFolderPath base dimens.xml 文件的res目录
+     * @return 返回消息
      */
-    public static void start(String tempBaseDP, String[] needMatchs, String[] ignoreMatchs, String resFolderPath) {
-        try {
-            baseDP = Double.parseDouble(tempBaseDP);
-        } catch (NumberFormatException e) {
+    public static String start(boolean isFontMatch, String tempBaseDP, String[] needMatchs, String[] ignoreMatchs, String resFolderPath) {
+        if (tempBaseDP != null && !"".equals(tempBaseDP.trim())) {
+            try {
+                baseDP = Double.parseDouble(tempBaseDP.trim());
+                if (baseDP <= 0) {
+                    baseDP = DEFAULT_DP;
+                }
+            } catch (NumberFormatException e) {
+                baseDP = DEFAULT_DP;
+                e.printStackTrace();
+            }
+        } else {
             baseDP = DEFAULT_DP;
-            e.printStackTrace();
         }
+
         //添加默认的数据
         for (int i = 0; i < defaultDPArr.length; i++) {
             try {
@@ -82,20 +92,24 @@ public class MainDimenSax {
             }
         }
         if (needMatchs != null) {
-            for (int i = 0; i < needMatchs.length; i++) {
-                try {
-                    dataSet.add(Double.parseDouble(needMatchs[i]));
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
+            for (String needMatch : needMatchs) {
+                if (needMatch != null && !"".equals(needMatch.trim())) {
+                    try {
+                        dataSet.add(Double.parseDouble(needMatch.trim()));
+                    } catch (NumberFormatException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
         if (ignoreMatchs != null) {
-            for (int i = 0; i < ignoreMatchs.length; i++) {
-                try {
-                    dataSet.remove(Double.parseDouble(ignoreMatchs[i]));
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
+            for (String ignoreMatch : ignoreMatchs) {
+                if (ignoreMatch != null && !"".equals(ignoreMatch.trim())) {
+                    try {
+                        dataSet.remove(Double.parseDouble(ignoreMatch.trim()));
+                    } catch (NumberFormatException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -108,31 +122,37 @@ public class MainDimenSax {
         //判断基准文件是否存在
         if (!testBaseDimenFile.exists()) {
             System.out.println("DK WARNING:  \"./res/values/dimens.xml\" 路径下的文件找不到!");
-            return;
+            return "对应Module \"./res/values/dimens.xml\" 路径下的文件找不到!";
         }
         //解析源dimens.xml文件
         ArrayList<DimenBean> list = readBaseDimenFile(baseDimenFilePath);
         if (list == null || list.size() <= 0) {
             System.out.println("DK WARNING:  \"./res/values/dimens.xml\" 文件无数据!");
-            return;
+            return "\"./res/values/dimens.xml\" 文件无数据!";
         } else {
             System.out.println("OK \"./res/values/dimens.xml\" 基准dimens文件解析成功!");
         }
-        //循环指定的dp参数，生成对应的dimens-swXXXdp.xml文件
-        Iterator<Double> iterator = dataSet.iterator();
-        while (iterator.hasNext()) {
-            double item = iterator.next();
-            //获取当前dp除以baseDP后的倍数
-            double multiple = item / baseDP;
-            //创建当前dp对应的dimens文件目录
-            String outPutDir = resFolderPath + "/values-w" + (int) item + "dp/";
-            new File(outPutDir).mkdirs();
-            //生成的dimens文件里路径
-            String outPutFile = outPutDir + "dimens.xml";
-            //生成目标文件dimens.xml输出目录
-            createDestinationDimens(list, multiple, outPutFile);
+        try {
+            //循环指定的dp参数，生成对应的dimens-swXXXdp.xml文件
+            Iterator<Double> iterator = dataSet.iterator();
+            while (iterator.hasNext()) {
+                double item = iterator.next();
+                //获取当前dp除以baseDP后的倍数
+                double multiple = item / baseDP;
+                //创建当前dp对应的dimens文件目录
+                String outPutDir = resFolderPath + "/values-w" + (int) item + "dp/";
+                new File(outPutDir).mkdirs();
+                //生成的dimens文件里路径
+                String outPutFile = outPutDir + "dimens.xml";
+                //生成目标文件dimens.xml输出目录
+                createDestinationDimens(isFontMatch, list, multiple, outPutFile);
+            }
+            System.out.println("OK ALL OVER，全部生成完毕！");
+            //适配完成
+            return "All over. Successful.";
+        } catch (Exception e) {
+            return "ERROR: " + e.getMessage();
         }
-        System.out.println("OK ALL OVER，全部生成完毕！");
     }
 
     /**
@@ -158,11 +178,12 @@ public class MainDimenSax {
     /**
      * 生成对应的dimens目标文件
      *
-     * @param list       源dimens数据
-     * @param multiple   对应新文件需要乘以的系数
-     * @param outPutFile 目标文件输出目录
+     * @param isFontMatch 字体是否也适配(是否与dp尺寸一样等比缩放)
+     * @param list        源dimens数据
+     * @param multiple    对应新文件需要乘以的系数
+     * @param outPutFile  目标文件输出目录
      */
-    private static void createDestinationDimens(ArrayList<DimenBean> list, double multiple, String outPutFile) {
+    private static void createDestinationDimens(boolean isFontMatch, ArrayList<DimenBean> list, double multiple, String outPutFile) {
         try {
             File targetFile = new File(outPutFile);
             if (targetFile.exists()) {
@@ -199,7 +220,7 @@ public class MainDimenSax {
             for (int i = 0; i < size; i++) {
                 DimenBean dimenBean = list.get(i);
                 //乘以系数，加上后缀
-                String targetValue = countValue(dimenBean.value, multiple);
+                String targetValue = countValue(isFontMatch, dimenBean.value, multiple);
                 attributes.clear();
                 attributes.addAttribute("", "", SAXReadHandler.PROPERTY_NAME, "", dimenBean.name);
 
@@ -224,30 +245,57 @@ public class MainDimenSax {
     /**
      * 乘以系数
      *
-     * @param oldValue 原字符串
-     * @param multiple 乘以系数后，且带单位的字符串
+     * @param isFontMatch 字体是否也适配(是否与dp尺寸一样等比缩放)
+     * @param sourceValue 原字符串
+     * @param multiple    乘以系数后，且带单位的字符串
      * @return
      */
-    private static String countValue(String oldValue, double multiple) {
-        if (oldValue == null) {
+    private static String countValue(boolean isFontMatch, String sourceValue, double multiple) {
+        if (sourceValue == null) {
             return "";
         }
-        oldValue = oldValue.trim();
-        if ("".equals(oldValue)
-                || oldValue.length() <= 2
-                || oldValue.startsWith("@dimen/")
-                || !"dp".equals(oldValue.substring(oldValue.length() - 2, oldValue.length()))) {
-            return oldValue;
+        sourceValue = sourceValue.trim();
+        if ("".equals(sourceValue)
+                || sourceValue.startsWith("@dimen/")
+                || sourceValue.length() < 3
+                || "dip".equals(sourceValue)) {
+            return sourceValue;
+        }
+        if (!sourceValue.endsWith("dp") && !sourceValue.endsWith("dip") && !sourceValue.endsWith("sp")) {
+            return sourceValue;
+        }
+        String endValue = null;
+        String startValue = null;
+        if (sourceValue.endsWith("dip")) {
+            endValue = "dip";
+            startValue = sourceValue.substring(0, sourceValue.length() - 3);
+        }
+        if (sourceValue.endsWith("dp")) {
+            endValue = "dp";
+            startValue = sourceValue.substring(0, sourceValue.length() - 2);
+        }
+        if (sourceValue.endsWith("sp")) {
+            if (!isFontMatch) {
+                //如果为false，则字体不适配缩放
+                return sourceValue;
+            }
+            endValue = "sp";
+            startValue = sourceValue.substring(0, sourceValue.length() - 2);
+        }
+        if (endValue == null
+                || "".equals(endValue.trim())
+                || "".equals(startValue.trim())) {
+            return sourceValue;
         }
         //乘以系数
         double temp = 0;
         try {
-            temp = Double.parseDouble(oldValue.substring(0, oldValue.length() - 2).trim()) * multiple;
+            temp = Double.parseDouble(startValue.trim()) * multiple;
         } catch (Exception e) {
-            return oldValue.trim();
+            return sourceValue;
         }
         //数据格式化对象
         DecimalFormat df = new DecimalFormat("0.00");
-        return df.format(temp) + "dp";
+        return df.format(temp) + endValue;
     }
 }

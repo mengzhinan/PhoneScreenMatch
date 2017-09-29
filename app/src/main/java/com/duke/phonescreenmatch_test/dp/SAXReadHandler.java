@@ -9,17 +9,18 @@ import java.util.ArrayList;
 /**
  * @Author: duke
  * @DateTime: 2016-08-24 17:27
- * @Description: 解析xml
+ * @UpdateTime: 2017-09-29 09:55
+ * @Description: 解析xml工具类
  */
 public class SAXReadHandler extends DefaultHandler {
-    private ArrayList<DimenBean> list = null;
-    private DimenBean dimenBean;
+    private ArrayList<DimenItem> list = null;
+    private DimenItem dimenBean;
     private String tempElement;
     static final String ELEMENT_RESOURCE = "resources";
     static final String ELEMENT_DIMEN = "dimen";
     static final String PROPERTY_NAME = "name";
 
-    public ArrayList<DimenBean> getData() {
+    public ArrayList<DimenItem> getData() {
         return list;
     }
 
@@ -32,7 +33,7 @@ public class SAXReadHandler extends DefaultHandler {
                 list = new ArrayList<>();
             } else if (qName.equals(ELEMENT_DIMEN)) {
                 //创建对象
-                dimenBean = new DimenBean();
+                dimenBean = new DimenItem();
                 if (attributes != null && attributes.getLength() > 0) {
                     dimenBean.name = attributes.getValue(PROPERTY_NAME);
                 }

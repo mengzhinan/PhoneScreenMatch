@@ -13,14 +13,15 @@
      https://github.com/mengzhinan/PhoneScreenMatch
 	 http://blog.csdn.net/fesdgasdgasdg/article/details/78107653
 	 http://blog.csdn.net/fesdgasdgasdg/article/details/78108169
+	 http://blog.csdn.net/fesdgasdgasdg/article/details/78133821
     -->
 
 
     <!-- Your custom size, for example: -->
     <dimen name="card_common_margin_left">@dimen/dp_15</dimen>
 
-	
-	
+
+
     <!-- Add custom additions if you don't want them -->
     <!-- common screen match for layout view size -->
     <dimen name="dp_m_60">-60dp</dimen>

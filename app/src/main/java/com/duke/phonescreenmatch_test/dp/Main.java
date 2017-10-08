@@ -19,8 +19,8 @@ public class Main {
     //默认支持的dp值
     private static final String[] defaultDPArr = new String[]{"384", "392", "400", "410", "411", "480", "533", "592", "600", "640", "662", "720", "768", "800", "811", "820", "960", "961", "1024", "1280", "1365"};
 
-    //生成的values目录格式
-    private static String values_folder = "values-wXXXdp";//values-w410dp
+    //生成的values目录格式(代码中替换XXX字符串)
+    private static String VALUES_FOLDER = "values-wXXXdp";//values-w410dp
 
     //去重复的数据集合
     private static HashSet<Double> dataSet = new HashSet<>();
@@ -140,7 +140,7 @@ public class Main {
                 //获取当前dp除以baseDP后的倍数
                 double multiple = item / baseDP;
                 //创建当前dp对应的dimens文件目录
-                String outPutDir = resFolderPath + File.separator + values_folder.replace("XXX", String.valueOf((int) item)) + File.separator;
+                String outPutDir = resFolderPath + File.separator + VALUES_FOLDER.replace("XXX", String.valueOf((int) item)) + File.separator;
                 new File(outPutDir).mkdirs();
                 //生成的dimens文件的路径
                 String outPutFile = outPutDir + "dimens.xml";

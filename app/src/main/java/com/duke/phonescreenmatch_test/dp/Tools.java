@@ -1,9 +1,12 @@
 package com.duke.phonescreenmatch_test.dp;
 
+import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 算法工具类
@@ -118,5 +121,64 @@ public class Tools {
             result = sourceValue;
         }
         return result;
+    }
+
+    /**
+     * 递归删除目录
+     *
+     * @param file 待删除的文件或目录
+     */
+    public static void deleteFile(File file) {
+        if (file == null || !file.exists()) {
+            return;
+        }
+        if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            if (files != null && files.length > 0) {
+                for (int i = 0; i < files.length; i++) {
+                    // 递归删除
+                    deleteFile(files[i]);
+                }
+            }
+            try {
+                // 删除当前空目录
+                file.delete();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            // 是文件
+            try {
+                // 删除当前文件
+                file.delete();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * 判断当前文件目录名是否为 values-wXXXdp 格式，即以前的旧文件目录
+     *
+     * @param path ..../res/values-wXXXdp
+     * @param isUseNewFolder 是否使用新的目录格式 values-swXXXdp
+     * @return 是否是指定格式的目录
+     */
+    public static boolean isOldFolder(String path, boolean isUseNewFolder) {
+        if (path == null || path.trim().length() == 0) {
+            return false;
+        }
+
+        String regEx = "";
+        if (isUseNewFolder) {
+            //即删除旧的目录 values-wXXXdp
+            regEx = "^values-w[0-9]+dp$";
+        } else {
+            //删除新的目录格式 values-swXXXdp
+            regEx = "^values-sw[0-9]+dp$";
+        }
+        Pattern pattern = Pattern.compile(regEx, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(path);
+        return matcher.find();
     }
 }

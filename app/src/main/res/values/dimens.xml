@@ -37,6 +37,7 @@
     <dimen name="dp_0_1">0.1dp</dimen>
     <dimen name="dp_0_5">0.5dp</dimen>
     <dimen name="dp_1">1dp</dimen>
+    <dimen name="dp_1_5">1.5dp</dimen>
     <dimen name="dp_2">2dp</dimen>
     <dimen name="dp_2_5">2.5dp</dimen>
     <dimen name="dp_3">3dp</dimen>

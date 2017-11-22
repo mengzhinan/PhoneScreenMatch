@@ -19,56 +19,62 @@ public class Tools {
      * 乘以系数
      *
      * @param isFontMatch 字体是否也适配(是否与dp尺寸一样等比缩放)
-     * @param sourceValue 原字符串
-     * @param multiple    乘以系数后，且带单位的字符串
-     * @return
+     * @param sourceValue 原字符串 @dimen/dp_xxx 或 xxxdp
+     * @param multiple    屏幕宽度dp基于360dp宽度的系数比值
+     * @return 乘以系数后的缩放值字符串，且带单位
      */
     public static String countValue(boolean isFontMatch, String sourceValue, double multiple) {
-        if (sourceValue == null) {
-            return "";
+        if (sourceValue == null || "".equals(sourceValue.trim())) {
+            //无效值，不执行计算
+            return "errorValue";
         }
+        //去除值两端空格，包括引用值
         sourceValue = sourceValue.trim();
-        if ("".equals(sourceValue)
-                || sourceValue.startsWith("@dimen/")
-                || sourceValue.length() < 3
-                || "dip".equals(sourceValue)) {
+        // @dimen/dp_xxx
+        // @dimen/sp_xxx
+        if (sourceValue.startsWith("@dimen/")) {
+            //引用值，不执行计算
             return sourceValue;
         }
-        if (!sourceValue.endsWith("dp") && !sourceValue.endsWith("dip") && !sourceValue.endsWith("sp")) {
-            return sourceValue;
-        }
-        String endValue = null;
-        String startValue = null;
+        //替换非引用值的单位dip为dp
         if (sourceValue.endsWith("dip")) {
-            endValue = "dip";
-            startValue = sourceValue.substring(0, sourceValue.length() - 3);
+            //我只确保最后的dip替换成dp，你非要写成39dipdip这种恶心的值，我也管不了
+            sourceValue = sourceValue.replaceAll("dip", "dp");
         }
-        if (sourceValue.endsWith("dp")) {
-            endValue = "dp";
-            startValue = sourceValue.substring(0, sourceValue.length() - 2);
+        // xxpx
+        // xxpt
+        // ...
+        if (!sourceValue.endsWith("dp") && !sourceValue.endsWith("sp")) {
+            //非dp或sp数据，不执行计算
+            return sourceValue;
         }
         if (sourceValue.endsWith("sp")) {
             if (!isFontMatch) {
-                //如果为false，则字体不适配缩放
+                //如果为false，不执行计算
                 return sourceValue;
             }
-            endValue = "sp";
-            startValue = sourceValue.substring(0, sourceValue.length() - 2);
         }
-        if (endValue == null
-                || "".equals(endValue.trim())
-                || "".equals(startValue.trim())) {
+        if (sourceValue.length() < 3) {
+            //只剩下单位dp或sp，不执行计算
+            return sourceValue;
+        }
+        int length = sourceValue.length();
+        String endValue = sourceValue.substring(length - 2, length);//单位dp或sp
+        String startValue = sourceValue.substring(0, length - 2);//数值
+        endValue = endValue.trim();
+        startValue = startValue.trim();
+        if ("".equals(endValue) || "".equals(startValue)) {
             return sourceValue;
         }
         //乘以系数
         double temp = 0;
         try {
-            temp = Double.parseDouble(startValue.trim()) * multiple;
+            temp = Double.parseDouble(startValue) * multiple;
         } catch (Exception e) {
             return sourceValue;
         }
         //数据格式化对象
-        DecimalFormat df = new DecimalFormat("0.00");
+        DecimalFormat df = new DecimalFormat("0.0000");
         return df.format(temp) + endValue;
     }
 
@@ -160,7 +166,7 @@ public class Tools {
     /**
      * 判断当前文件目录名是否为 values-wXXXdp 格式，即以前的旧文件目录
      *
-     * @param path ..../res/values-wXXXdp
+     * @param path           ..../res/values-wXXXdp
      * @param isUseNewFolder 是否使用新的目录格式 values-swXXXdp
      * @return 是否是指定格式的目录
      */

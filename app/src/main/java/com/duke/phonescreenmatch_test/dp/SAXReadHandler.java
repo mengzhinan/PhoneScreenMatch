@@ -58,7 +58,19 @@ public class SAXReadHandler extends DefaultHandler {
     public void characters(char[] ch, int start, int length) throws SAXException {
         if (tempElement != null && tempElement.trim().equals(ELEMENT_DIMEN)) {
             if (dimenBean != null) {
-                dimenBean.value = new String(ch, start, length);
+                String temp = new String(ch, start, length);
+                if (temp.trim().length() > 0) {
+                    temp = temp.trim();
+                    /**
+                     * 感谢网友提醒，发现偶现的bug，同一处的文本会回调多次
+                     */
+                    if (dimenBean.value == null || dimenBean.value.trim().length() == 0) {
+                        dimenBean.value = temp;
+                    } else {
+                        //内容累加
+                        dimenBean.value += temp;
+                    }
+                }
             }
         }
     }

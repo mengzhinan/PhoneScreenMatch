@@ -1,29 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <resources>
 
-    <!--
-     added by duke, 2017-09-29
-     A multi screen adaptation scheme based on Google.
-     Please take the screen width as 360dp.
-     Different sizes of screens will use different dimens.xml files,don't worry.
-     If you have some variable special layout,please add below.
-     It's better for us to use a unified variable.
-     Learn more to references below:
-     http://blog.csdn.net/fesdgasdgasdg/article/details/52325590
-     http://download.csdn.net/download/fesdgasdgasdg/9913744
-     https://github.com/mengzhinan/PhoneScreenMatch
-	 http://blog.csdn.net/fesdgasdgasdg/article/details/78107653
-	 http://blog.csdn.net/fesdgasdgasdg/article/details/78108169
-	 http://blog.csdn.net/fesdgasdgasdg/article/details/78133821
-    -->
-
-
-    <!-- Your custom size, for example: -->
+    <!-- Your custom size defind by references, can be writted in anywhere, any module, any values/*.xml, for example: -->
     <dimen name="card_common_margin_left">@dimen/dp_15</dimen>
 
-
-
-    <!-- Add custom additions if you don't want them -->
-    <!-- common screen match for layout view size -->
+    <!-- dp and sp values, must be defind in this file! -->
+    <!-- view size,you can add if there is no one -->
     <dimen name="dp_m_60">-60dp</dimen>
     <dimen name="dp_m_30">-30dp</dimen>
     <dimen name="dp_m_20">-20dp</dimen>
@@ -41,6 +23,7 @@
     <dimen name="dp_2">2dp</dimen>
     <dimen name="dp_2_5">2.5dp</dimen>
     <dimen name="dp_3">3dp</dimen>
+    <dimen name="dp_3_5">3.5dp</dimen>
     <dimen name="dp_4">4dp</dimen>
     <dimen name="dp_4_5">4.5dp</dimen>
     <dimen name="dp_5">5dp</dimen>
@@ -414,7 +397,7 @@
     <dimen name="dp_640">640dp</dimen>
     <dimen name="dp_720">720dp</dimen>
 
-    <!-- common screen match for text font size -->
+    <!-- font size,you can add if there is no one -->
     <dimen name="sp_6">6sp</dimen>
     <dimen name="sp_7">7sp</dimen>
     <dimen name="sp_8">8sp</dimen>

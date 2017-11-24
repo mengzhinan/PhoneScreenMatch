@@ -2,11 +2,6 @@ package com.duke.phonescreenmatch_test.dp;
 
 import org.xml.sax.helpers.AttributesImpl;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.util.ArrayList;
-
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.OutputKeys;
@@ -14,6 +9,10 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.stream.StreamResult;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
 
 /**
  * dimens处理
